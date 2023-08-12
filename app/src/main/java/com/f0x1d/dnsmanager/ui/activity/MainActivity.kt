@@ -28,7 +28,7 @@ import com.f0x1d.dnsmanager.viewmodel.MainViewModel
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.components.SingletonComponent
+import dagger.hilt.android.components.ActivityComponent
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -94,7 +94,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @EntryPoint
-@InstallIn(SingletonComponent::class)
+@InstallIn(ActivityComponent::class)
 interface MainActivityEntryPoint {
     fun createDNSItemViewModelFactory(): CreateDNSItemViewModelFactory
 }

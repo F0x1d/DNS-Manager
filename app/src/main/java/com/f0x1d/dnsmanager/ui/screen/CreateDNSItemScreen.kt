@@ -1,5 +1,6 @@
 package com.f0x1d.dnsmanager.ui.screen
 
+import android.app.Activity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -84,8 +85,8 @@ fun CreateDNSItemScreen(navController: NavController, itemId: Long = -1) {
 private fun createDNSItemViewModel(id: Long): CreateDNSItemViewModel {
     val context = LocalContext.current
     val assistedFactory = remember {
-        EntryPointAccessors.fromApplication(
-            context,
+        EntryPointAccessors.fromActivity(
+            context as Activity,
             MainActivityEntryPoint::class.java
         ).createDNSItemViewModelFactory()
     }
