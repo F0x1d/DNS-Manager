@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">DNS Manager</string>
+    <string name="name">Name</string>
+    <string name="host">Host</string>
+    <string name="create">Create</string>
+    <string name="edit">Edit</string>
+    <string name="permission_is_required">Permission is required</string>
+    <string name="check">Check</string>
+    <string name="how_to_grant_permission">How to grant permission?</string>
+    <string name="how_to_grant_permission_answer">Run this command in any terminal software.\n\nIf you use ADB, then prefix it with \"adb shell\".\n\n%s</string>
+</resources>
