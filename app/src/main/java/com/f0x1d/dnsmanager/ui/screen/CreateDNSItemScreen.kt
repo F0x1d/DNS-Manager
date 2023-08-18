@@ -1,6 +1,5 @@
 package com.f0x1d.dnsmanager.ui.screen
 
-import android.app.Activity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,28 +13,24 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.f0x1d.dnsmanager.R
-import com.f0x1d.dnsmanager.ui.activity.MainActivityEntryPoint
 import com.f0x1d.dnsmanager.ui.widget.BottomEdgeFloatingActionView
 import com.f0x1d.dnsmanager.ui.widget.NavigationBackIcon
 import com.f0x1d.dnsmanager.viewmodel.CreateDNSItemViewModel
-import dagger.hilt.android.EntryPointAccessors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateDNSItemScreen(navController: NavController, itemId: Long = -1) {
-    val viewModel = createDNSItemViewModel(id = itemId)
+fun CreateDNSItemScreen(navController: NavController) {
+    val viewModel = hiltViewModel<CreateDNSItemViewModel>()
 
     val dnsItem by viewModel.dnsItem.collectAsStateWithLifecycle(initialValue = null)
 
@@ -45,7 +40,7 @@ fun CreateDNSItemScreen(navController: NavController, itemId: Long = -1) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column {
             LargeTopAppBar(
-                title = { Text(text = stringResource(id = if (itemId == -1L) R.string.create else R.string.edit)) },
+                title = { Text(text = stringResource(id = if (viewModel.id == null) R.string.create else R.string.edit)) },
                 navigationIcon = { NavigationBackIcon(navController = navController) }
             )
 
@@ -79,17 +74,4 @@ fun CreateDNSItemScreen(navController: NavController, itemId: Long = -1) {
             }
         }
     }
-}
-
-@Composable
-private fun createDNSItemViewModel(id: Long): CreateDNSItemViewModel {
-    val context = LocalContext.current
-    val assistedFactory = remember {
-        EntryPointAccessors.fromActivity(
-            context as Activity,
-            MainActivityEntryPoint::class.java
-        ).createDNSItemViewModelFactory()
-    }
-
-    return viewModel(factory = CreateDNSItemViewModel.provideFactory(assistedFactory, id))
 }

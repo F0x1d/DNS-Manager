@@ -22,10 +22,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.f0x1d.dnsmanager.BuildConfig
 import com.f0x1d.dnsmanager.R
 import dev.shreyaspatil.permissionFlow.PermissionFlow
 
-private val COMMAND = "pm grant com.f0x1d.dnsmanager ${Manifest.permission.WRITE_SECURE_SETTINGS}"
+private val COMMAND = "pm grant ${BuildConfig.APPLICATION_ID} ${Manifest.permission.WRITE_SECURE_SETTINGS}"
 
 @Composable
 fun SetupScreen() {

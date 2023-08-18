@@ -23,12 +23,8 @@ import com.f0x1d.dnsmanager.ui.screen.CreateDNSItemScreen
 import com.f0x1d.dnsmanager.ui.screen.DNSListScreen
 import com.f0x1d.dnsmanager.ui.screen.SetupScreen
 import com.f0x1d.dnsmanager.ui.theme.DNSManagerTheme
-import com.f0x1d.dnsmanager.viewmodel.CreateDNSItemViewModelFactory
 import com.f0x1d.dnsmanager.viewmodel.MainViewModel
-import dagger.hilt.EntryPoint
-import dagger.hilt.InstallIn
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.components.ActivityComponent
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -79,10 +75,7 @@ class MainActivity : ComponentActivity() {
                                     enterTransition = { fadeIn() },
                                     exitTransition = { fadeOut() }
                                 ) {
-                                    CreateDNSItemScreen(
-                                        navController = navController,
-                                        itemId = it.arguments!!.getLong("id")
-                                    )
+                                    CreateDNSItemScreen(navController = navController)
                                 }
                             }
                         }
@@ -91,10 +84,4 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
-
-@EntryPoint
-@InstallIn(ActivityComponent::class)
-interface MainActivityEntryPoint {
-    fun createDNSItemViewModelFactory(): CreateDNSItemViewModelFactory
 }

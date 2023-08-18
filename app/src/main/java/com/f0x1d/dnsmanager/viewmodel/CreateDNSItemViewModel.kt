@@ -2,40 +2,28 @@ package com.f0x1d.dnsmanager.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.f0x1d.dnsmanager.database.AppDatabase
 import com.f0x1d.dnsmanager.database.entity.DNSItem
+import com.f0x1d.dnsmanager.di.viewmodel.DNSItemId
 import com.f0x1d.dnsmanager.selector.DNSSelector
 import com.f0x1d.dnsmanager.viewmodel.base.BaseViewModel
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class CreateDNSItemViewModel @AssistedInject constructor(
-    @Assisted private val id: Long,
+@HiltViewModel
+class CreateDNSItemViewModel @Inject constructor(
+    @DNSItemId val id: Long?,
     private val database: AppDatabase,
     private val selector: DNSSelector,
     application: Application
 ): BaseViewModel(application) {
 
-    companion object {
-        fun provideFactory(
-            assistedFactory: CreateDNSItemViewModelFactory,
-            id: Long
-        ) = viewModelFactory {
-            initializer {
-                assistedFactory.create(id)
-            }
-        }
-    }
-
-    val dnsItem = database.dnsItems().getById(id)
+    val dnsItem = database.dnsItems().getById(id ?: -1L)
         .filterNotNull()
         .flowOn(Dispatchers.IO)
 
@@ -54,9 +42,4 @@ class CreateDNSItemViewModel @AssistedInject constructor(
 
         withContext(Dispatchers.Main) { onDone() }
     }
-}
-
-@AssistedFactory
-interface CreateDNSItemViewModelFactory {
-    fun create(id: Long): CreateDNSItemViewModel
 }
