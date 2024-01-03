@@ -8,4 +8,6 @@
     <string name="check">Check</string>
     <string name="how_to_grant_permission">How to grant permission?</string>
     <string name="how_to_grant_permission_answer">Run this command in any terminal software.\n\nIf you use ADB, then prefix it with \"adb shell\".\n\n%s</string>
+    <string name="switch_mode">Switch mode</string>
+    <string name="auto_mode">Auto mode</string>
 </resources>
