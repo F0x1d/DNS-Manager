@@ -21,6 +21,8 @@ class DNSSelector @Inject constructor(
         const val PRIVATE_DNS_SPECIFIER = "private_dns_specifier"
     }
 
+    private val listeners = mutableListOf<OnDNSSelectedListener>()
+
     val currentHost: String? get() = ctx.contentResolver.let {
         val mode = Settings.Global.getString(it, PRIVATE_DNS_MODE)
             ?.ifEmpty { null }
@@ -35,13 +37,30 @@ class DNSSelector @Inject constructor(
         }
     }
 
-    fun select(dnsItem: DNSItem) = ctx.contentResolver.let {
+    fun select(dnsItem: DNSItem) = select(dnsItem.host)
+
+    fun select(host: String) = ctx.contentResolver.let {
         Settings.Global.putString(it, PRIVATE_DNS_MODE, PRIVATE_DNS_MODE_PROVIDER_HOSTNAME)
-        Settings.Global.putString(it, PRIVATE_DNS_SPECIFIER, dnsItem.host)
+        Settings.Global.putString(it, PRIVATE_DNS_SPECIFIER, host)
+
+        notifyAboutChange(host)
     }
 
     fun reset() = ctx.contentResolver.let {
         Settings.Global.putString(it, PRIVATE_DNS_MODE, PRIVATE_DNS_MODE_OPPORTUNISTIC)
         Settings.Global.putString(it, PRIVATE_DNS_SPECIFIER, "")
+
+        notifyAboutChange(null)
+    }
+
+    fun registerListener(listener: OnDNSSelectedListener) = listeners.add(listener)
+    fun unregisterListener(listener: OnDNSSelectedListener) = listeners.remove(listener)
+
+    private fun notifyAboutChange(host: String?) = listeners.forEach {
+        it.onSelected(host)
+    }
+
+    fun interface OnDNSSelectedListener {
+        fun onSelected(host: String?)
     }
 }
