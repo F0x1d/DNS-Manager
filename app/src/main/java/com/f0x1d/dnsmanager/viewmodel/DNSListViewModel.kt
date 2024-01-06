@@ -1,7 +1,9 @@
 package com.f0x1d.dnsmanager.viewmodel
 
 import android.app.Application
+import android.widget.Toast
 import androidx.lifecycle.viewModelScope
+import com.f0x1d.dnsmanager.R
 import com.f0x1d.dnsmanager.database.AppDatabase
 import com.f0x1d.dnsmanager.database.entity.DNSItem
 import com.f0x1d.dnsmanager.selector.DNSSelector
@@ -11,6 +13,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -43,13 +46,25 @@ class DNSListViewModel @Inject constructor(
     }
 
     fun delete(dnsItem: DNSItem) = viewModelScope.launch(Dispatchers.IO) {
-        if (dnsItem.host == currentDNSHost.value) selector.reset()
+        if (dnsItem.host == currentDNSHost.value) selector.resetSwitch()
+
+        if (dnsItem.host == settingsDataStore.lastHost.first())
+            settingsDataStore.saveLastHost(null)
 
         database.dnsItems().delete(dnsItem)
     }
 
-    fun reset() = selector.reset().also {
+    fun reset() = selector.resetSwitch().also {
         updateSelectedDNSHost()
+
+        Toast.makeText(
+            ctx,
+            ctx.getString(
+                R.string.switched_to,
+                ctx.getString(selector.currentMode.title)
+            ),
+            Toast.LENGTH_SHORT
+        ).show()
     }
 
     fun updateSelectedDNSHost() = currentDNSHost.update {
