@@ -3,6 +3,7 @@ package com.f0x1d.dnsmanager.selector
 import android.content.Context
 import android.provider.Settings
 import com.f0x1d.dnsmanager.database.entity.DNSItem
+import com.f0x1d.dnsmanager.model.DNSMode
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -22,6 +23,18 @@ class DNSSelector @Inject constructor(
     }
 
     private val listeners = mutableListOf<OnDNSSelectedListener>()
+
+    val currentMode: DNSMode get() = ctx.contentResolver.let {
+        val mode = Settings.Global.getString(it, PRIVATE_DNS_MODE)
+            ?.ifEmpty { null }
+            ?: Settings.Global.getString(it, PRIVATE_DNS_DEFAULT_MODE)
+
+        when (mode) {
+            PRIVATE_DNS_MODE_OFF -> DNSMode.OFF
+            PRIVATE_DNS_MODE_OPPORTUNISTIC -> DNSMode.AUTO
+            else -> DNSMode.CUSTOM
+        }
+    }
 
     val currentHost: String? get() = ctx.contentResolver.let {
         val mode = Settings.Global.getString(it, PRIVATE_DNS_MODE)
@@ -46,8 +59,16 @@ class DNSSelector @Inject constructor(
         notifyAboutChange(host)
     }
 
-    fun reset() = ctx.contentResolver.let {
-        Settings.Global.putString(it, PRIVATE_DNS_MODE, PRIVATE_DNS_MODE_OPPORTUNISTIC)
+    fun resetSwitch() = when (currentMode) {
+        DNSMode.AUTO -> resetOff()
+        else -> resetAuto()
+    }
+
+    fun resetAuto() = reset(PRIVATE_DNS_MODE_OPPORTUNISTIC)
+    fun resetOff() = reset(PRIVATE_DNS_MODE_OFF)
+
+    private fun reset(mode: String) = ctx.contentResolver.let {
+        Settings.Global.putString(it, PRIVATE_DNS_MODE, mode)
         Settings.Global.putString(it, PRIVATE_DNS_SPECIFIER, "")
 
         notifyAboutChange(null)
