@@ -54,6 +54,13 @@ fun DNSListScreen(navController: NavController) {
                         contentDescription = null
                     )
                 }
+
+                IconButton(onClick = { navController.navigate(Screen.Settings.route) }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_settings),
+                        contentDescription = null
+                    )
+                }
             },
             scrollBehavior = scrollBehavior
         )

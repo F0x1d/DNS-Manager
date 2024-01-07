@@ -21,6 +21,7 @@ import androidx.navigation.navArgument
 import com.f0x1d.dnsmanager.model.navigation.Screen
 import com.f0x1d.dnsmanager.ui.screen.CreateDNSItemScreen
 import com.f0x1d.dnsmanager.ui.screen.DNSListScreen
+import com.f0x1d.dnsmanager.ui.screen.SettingsScreen
 import com.f0x1d.dnsmanager.ui.screen.SetupScreen
 import com.f0x1d.dnsmanager.ui.theme.DNSManagerTheme
 import com.f0x1d.dnsmanager.viewmodel.MainViewModel
@@ -76,6 +77,14 @@ class MainActivity : ComponentActivity() {
                                     exitTransition = { fadeOut() }
                                 ) {
                                     CreateDNSItemScreen(navController = navController)
+                                }
+
+                                composable(
+                                    route = Screen.Settings.route,
+                                    enterTransition = { fadeIn() },
+                                    exitTransition = { fadeOut() }
+                                ) {
+                                    SettingsScreen(navController = navController)
                                 }
                             }
                         }

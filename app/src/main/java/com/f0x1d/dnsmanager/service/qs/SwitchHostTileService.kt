@@ -3,6 +3,7 @@ package com.f0x1d.dnsmanager.service.qs
 import android.os.Build
 import android.service.quicksettings.Tile
 import com.f0x1d.dnsmanager.database.AppDatabase
+import com.f0x1d.dnsmanager.database.entity.DNSItem
 import com.f0x1d.dnsmanager.model.DNSMode
 import com.f0x1d.dnsmanager.selector.DNSSelector
 import com.f0x1d.dnsmanager.service.qs.base.BaseTileService
@@ -30,10 +31,10 @@ class SwitchHostTileService: BaseTileService() {
         super.onStartListening()
 
         scope.launch {
-            val lastHost = settingsDataStore.lastHost.first()
+            val lastDNSItem = settingsDataStore.lastDNSItem.first()
             if (!canUpdate) return@launch
 
-            updateTile(lastHost)
+            updateTile(lastDNSItem)
         }
     }
 
@@ -41,28 +42,28 @@ class SwitchHostTileService: BaseTileService() {
         super.onClick()
 
         scope.launch {
-            val lastHost = settingsDataStore.lastHost.first()
+            val lastDNSItem = settingsDataStore.lastDNSItem.first()
 
             val dnsItems = database.dnsItems().getAll().flowOn(Dispatchers.IO).first()
-            val nextIndex = dnsItems.indexOfLast { it.host == lastHost } + 1
+            val nextIndex = dnsItems.indexOfLast { it.id == lastDNSItem?.id } + 1
 
             val newDNSItem = dnsItems.getOrNull(nextIndex) ?: dnsItems.firstOrNull() ?: return@launch
-            settingsDataStore.saveLastHost(newDNSItem.host)
+            settingsDataStore.saveLastDNSItem(newDNSItem)
 
             if (selector.currentMode == DNSMode.CUSTOM)
                 selector.select(newDNSItem)
 
-            updateTile(newDNSItem.host)
+            updateTile(newDNSItem)
         }
     }
 
-    private fun updateTile(host: String?) = qsTile.apply {
+    private fun updateTile(item: DNSItem?) = qsTile.apply {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-            subtitle = host
+            subtitle = item?.name
         else
-            label = host
+            label = item?.name
 
-        state = when (host != null) {
+        state = when (item != null) {
             true -> Tile.STATE_ACTIVE
 
             else -> Tile.STATE_INACTIVE
