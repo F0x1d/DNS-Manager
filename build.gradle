@@ -4,6 +4,8 @@ buildscript {
         kotlin_version = '1.9.21'
         ksp_version = '1.9.21-1.0.16'
 
+        kotlin_serialization_version = "1.6.2"
+
         room_version = '2.6.1'
         hilt_version = '2.48'
         hilt_navigation_version = '1.1.0'
@@ -18,6 +20,8 @@ buildscript {
 
         material3_version = '1.2.0-alpha04'
         compose_version = '1.6.0-alpha02'
+
+        compose_prefs_version = '1.0.4'
 
         navigation_version = '2.7.6'
 
@@ -35,6 +39,7 @@ plugins {
     id 'com.android.application' version "$agp_version" apply false
     id 'com.android.library' version "$agp_version" apply false
     id 'org.jetbrains.kotlin.android' version "$kotlin_version" apply false
+    id 'org.jetbrains.kotlin.plugin.serialization' version "$kotlin_version" apply false
 
     id 'com.google.devtools.ksp' version "$ksp_version" apply false
     id 'com.google.dagger.hilt.android' version "$hilt_version" apply false

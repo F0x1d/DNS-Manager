@@ -8,18 +8,20 @@ import kotlinx.coroutines.cancel
 
 abstract class BaseTileService: TileService() {
 
-    private val job = SupervisorJob()
-    protected val scope = CoroutineScope(Dispatchers.Main + job)
+    protected val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    protected var listeningScope: CoroutineScope? = null
 
     protected var canUpdate = false
 
     override fun onStartListening() {
         super.onStartListening()
+        listeningScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
         canUpdate = true
     }
 
     override fun onStopListening() {
         super.onStopListening()
+        listeningScope?.cancel()
         canUpdate = false
     }
 

@@ -13,8 +13,8 @@ enum class DNSMode {
     }
 
     fun next() = when (this) {
-        OFF -> AUTO
-        AUTO -> CUSTOM
-        CUSTOM -> OFF
+        AUTO -> OFF
+        OFF -> CUSTOM
+        CUSTOM -> AUTO
     }
 }

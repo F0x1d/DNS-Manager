@@ -6,11 +6,13 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.map
 
-abstract class BaseDataStore(
+abstract class BasePreferencesDataStore(
     private val context: Context,
     private val dataStoreName: String
 ) {
     protected val Context.dataStore by preferencesDataStore(dataStoreName)
+
+    val dataStore get() = context.dataStore
 
     protected fun <T> getAsFlow(key: Preferences.Key<T>) = context.dataStore.data.map {
         it[key]

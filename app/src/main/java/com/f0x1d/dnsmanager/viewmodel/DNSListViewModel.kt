@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -37,26 +38,31 @@ class DNSListViewModel @Inject constructor(
         selector.registerListener(this)
     }
 
-    fun select(dnsItem: DNSItem) = selector.select(dnsItem).also {
-        updateSelectedDNSHost()
+    fun select(dnsItem: DNSItem) = viewModelScope.launch {
+        if (currentDNSHost.value == dnsItem.host)
+            reset().join()
+        else
+            selector.select(dnsItem)
 
-        viewModelScope.launch {
-            settingsDataStore.saveLastHost(dnsItem.host)
+        updateSelectedDNSHost()
+        settingsDataStore.saveLastDNSItem(dnsItem)
+    }
+
+    fun delete(dnsItem: DNSItem) = viewModelScope.launch {
+        if (dnsItem.host == currentDNSHost.value) selector.resetSwitch()
+
+        if (dnsItem.id == settingsDataStore.lastDNSItem.first()?.id)
+            settingsDataStore.saveLastDNSItem(null)
+
+        withContext(Dispatchers.IO) {
+            database.dnsItems().delete(dnsItem)
         }
     }
 
-    fun delete(dnsItem: DNSItem) = viewModelScope.launch(Dispatchers.IO) {
-        if (dnsItem.host == currentDNSHost.value) selector.resetSwitch()
+    fun reset() = viewModelScope.launch {
+        selector.resetSwitch()
 
-        if (dnsItem.host == settingsDataStore.lastHost.first())
-            settingsDataStore.saveLastHost(null)
-
-        database.dnsItems().delete(dnsItem)
-    }
-
-    fun reset() = selector.resetSwitch().also {
         updateSelectedDNSHost()
-
         Toast.makeText(
             ctx,
             ctx.getString(
