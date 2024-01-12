@@ -4,13 +4,16 @@ import android.graphics.drawable.Icon
 import android.os.Build
 import android.service.quicksettings.Tile
 import com.f0x1d.dnsmanager.R
+import com.f0x1d.dnsmanager.database.AppDatabase
 import com.f0x1d.dnsmanager.database.entity.DNSItem
 import com.f0x1d.dnsmanager.model.DNSMode
 import com.f0x1d.dnsmanager.selector.DNSSelector
 import com.f0x1d.dnsmanager.service.qs.base.BaseTileService
 import com.f0x1d.dnsmanager.store.datastore.SettingsDataStore
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -21,6 +24,9 @@ class SwitchModeTileService: BaseTileService() {
 
     @Inject
     lateinit var selector: DNSSelector
+
+    @Inject
+    lateinit var database: AppDatabase
 
     @Inject
     lateinit var settingsDataStore: SettingsDataStore
@@ -38,6 +44,13 @@ class SwitchModeTileService: BaseTileService() {
 
         scope.launch {
             val lastDNSItem = settingsDataStore.lastDNSItem.first()
+                ?: database.dnsItems().getAll()
+                    .flowOn(Dispatchers.IO)
+                    .first()
+                    .firstOrNull()
+                    ?.also {
+                        settingsDataStore.saveLastDNSItem(it)
+                    }
 
             when (selector.currentMode.next()) {
                 DNSMode.OFF -> selector.resetOff()
@@ -47,7 +60,7 @@ class SwitchModeTileService: BaseTileService() {
                     if (lastDNSItem != null)
                         selector.select(lastDNSItem)
                     else
-                        selector.resetOff()
+                        selector.resetAuto()
                 }
             }
 

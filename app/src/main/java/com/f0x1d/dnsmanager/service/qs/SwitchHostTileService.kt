@@ -12,6 +12,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,12 +32,9 @@ class SwitchHostTileService: BaseTileService() {
     override fun onStartListening() {
         super.onStartListening()
 
-        scope.launch {
-            val lastDNSItem = settingsDataStore.lastDNSItem.first()
-            if (!canUpdate) return@launch
-
-            updateTile(lastDNSItem)
-        }
+        settingsDataStore.lastDNSItem
+            .onEach(this::updateTile)
+            .launchIn(listeningScope ?: return)
     }
 
     override fun onClick() {
@@ -52,8 +51,6 @@ class SwitchHostTileService: BaseTileService() {
 
             if (selector.currentMode == DNSMode.CUSTOM)
                 selector.select(newDNSItem)
-
-            updateTile(newDNSItem)
         }
     }
 
