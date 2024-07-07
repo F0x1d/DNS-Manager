@@ -5,6 +5,7 @@ Private DNS Manager for Android. Switch preferred private DNS as fast as possibl
 - Save as many private DNS hosts as needed
 - Swap private DNS mode using QS tile
 - Swap private DNS host using QS tile
+- Backup and restore your DNS hosts
 
 ## Screenshots
 <p align="center">

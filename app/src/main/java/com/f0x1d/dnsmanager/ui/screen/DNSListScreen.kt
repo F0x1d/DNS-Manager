@@ -1,5 +1,7 @@
 package com.f0x1d.dnsmanager.ui.screen
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19,6 +23,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
@@ -59,6 +66,40 @@ fun DNSListScreen(navController: NavController) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_settings),
                         contentDescription = null
+                    )
+                }
+
+                var menuExpanded by remember { mutableStateOf(false) }
+
+                IconButton(onClick = { menuExpanded = !menuExpanded }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_more_vert),
+                        contentDescription = null,
+                    )
+                }
+
+                DropdownMenu(
+                    expanded = menuExpanded,
+                    onDismissRequest = { menuExpanded = false },
+                ) {
+                    val exportLauncher = rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.CreateDocument("application/json"),
+                    ) { uri ->
+                        viewModel.export(uri ?: return@rememberLauncherForActivityResult)
+                    }
+                    DropdownMenuItem(
+                        text = { Text(text = stringResource(id = R.string.export_hosts)) },
+                        onClick = { exportLauncher.launch("hosts.json") },
+                    )
+
+                    val importLauncher = rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.GetContent(),
+                    ) { uri ->
+                        viewModel.import(uri ?: return@rememberLauncherForActivityResult)
+                    }
+                    DropdownMenuItem(
+                        text = { Text(text = stringResource(id = R.string.import_hosts)) },
+                        onClick = { importLauncher.launch("*/*") },
                     )
                 }
             },

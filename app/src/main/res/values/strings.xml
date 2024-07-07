@@ -16,4 +16,6 @@
     <string name="skip_auto_mode">Skip auto mode</string>
     <string name="settings">Settings</string>
     <string name="dns_mode">DNS mode</string>
+    <string name="export_hosts">Export hosts</string>
+    <string name="import_hosts">Import hosts</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.f0x1d.dnsmanager.viewmodel
 
 import android.app.Application
+import android.net.Uri
 import android.widget.Toast
 import androidx.lifecycle.viewModelScope
 import com.f0x1d.dnsmanager.R
@@ -12,12 +13,17 @@ import com.f0x1d.dnsmanager.viewmodel.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,6 +37,12 @@ class DNSListViewModel @Inject constructor(
     val dnsItems = database.dnsItems().getAll()
         .distinctUntilChanged()
         .flowOn(Dispatchers.IO)
+        .onEach { updateSelectedDNSHost() }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = emptyList(),
+        )
 
     val currentDNSHost = MutableStateFlow<String?>(null)
 
@@ -75,6 +87,27 @@ class DNSListViewModel @Inject constructor(
 
     fun updateSelectedDNSHost() = currentDNSHost.update {
         selector.currentHost
+    }
+
+    fun import(uri: Uri) = viewModelScope.launch(Dispatchers.IO) {
+        runCatching {
+            ctx.contentResolver.openInputStream(uri)?.use { inputStream ->
+                database.dnsItems().insert(
+                    Json.decodeFromString<List<DNSItem>>(
+                        inputStream.bufferedReader().readText(),
+                    ),
+                )
+            }
+        }
+    }
+
+    fun export(uri: Uri) = viewModelScope.launch(Dispatchers.IO) {
+        runCatching {
+            ctx.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                outputStream.write(Json.encodeToString(dnsItems.value).encodeToByteArray())
+                outputStream.flush()
+            }
+        }
     }
 
     override fun onCleared() {

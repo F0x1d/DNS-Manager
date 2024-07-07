@@ -20,6 +20,9 @@ interface DNSItemDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(dnsItem: DNSItem)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insert(dnsItems: List<DNSItem>)
+
     @Delete
     suspend fun delete(dnsItem: DNSItem)
 }
